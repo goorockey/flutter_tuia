@@ -11,6 +11,7 @@ public class Consts {
     }
 
     public static class FunctionName {
+        public static final String RENDER_SPLASH_AD = "renderSplashAd";
         public static final String RENDER_BANNER_AD = "renderBannerAd";
     }
 

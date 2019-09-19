@@ -13,8 +13,8 @@ import android.widget.LinearLayout;
 
 import com.example.flutter_tuia.Consts;
 import com.example.flutter_tuia.R;
-import com.lechuan.midunovel.view.FoxListener;
-import com.lechuan.midunovel.view.FoxStreamerView;
+import com.lechuan.midunovel.view.FoxShView;
+import com.lechuan.midunovel.view.FoxShListener;
 import com.lechuan.midunovel.view.FoxSize;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -26,14 +26,14 @@ import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.platform.PlatformView;
 
-public class FlutterBannerAdView implements PlatformView, MethodChannel.MethodCallHandler {
+public class FlutterSplashAdView implements PlatformView, MethodChannel.MethodCallHandler {
     private LinearLayout mLinearLayout;
     private Activity mActivity;
     private MethodChannel methodChannel;
-    private FoxStreamerView mTMBrAdView;
+    private FoxShView mTMBrAdView;
 
-    FlutterBannerAdView(Activity activity, BinaryMessenger messenger, int id) {
-        methodChannel = new MethodChannel(messenger, "flutter_tuia_banner_ad_view_" + id);
+    FlutterSplashAdView(Activity activity, BinaryMessenger messenger, int id) {
+        methodChannel = new MethodChannel(messenger, "flutter_tuia_splash_ad_view_" + id);
         methodChannel.setMethodCallHandler(this);
 
         this.mActivity = activity;
@@ -87,16 +87,16 @@ public class FlutterBannerAdView implements PlatformView, MethodChannel.MethodCa
 
     @Override
     public void onMethodCall(MethodCall methodCall, MethodChannel.Result result) {
-        if (Consts.FunctionName.RENDER_BANNER_AD.equals(methodCall.method)) {
-            renderBannerAd(methodCall, result);
+        if (Consts.FunctionName.RENDER_SPLASH_AD.equals(methodCall.method)) {
+            renderSplashAd(methodCall, result);
         }
     }
 
-    private void renderBannerAd(final MethodCall call, final MethodChannel.Result result) {
+    private void renderSplashAd(final MethodCall call, final MethodChannel.Result result) {
         try {
             Object positionIdVal = call.argument(Consts.ParamKey.POSITION_ID);
             if (positionIdVal == null) {
-                Log.d(Consts.TAG, "Tuia banner ad empty positionId");
+                Log.d(Consts.TAG, "Tuia splash ad empty positionId");
                 try {
                     result.success(false);
                 } catch (Exception e) {
@@ -104,20 +104,39 @@ public class FlutterBannerAdView implements PlatformView, MethodChannel.MethodCa
                 }
                 return;
             }
-
             int positionId = Integer.parseInt((String)positionIdVal);
+
+            int timeout = 3000;
+            Object timeoutVal = call.argument(Consts.ParamKey.TIMEOUT);
+            if (timeoutVal != null) {
+                timeout = (int) timeoutVal;
+            }
 
             if (mTMBrAdView != null) {
                 mTMBrAdView.destroy();
                 mTMBrAdView = null;
             }
 
-            mTMBrAdView = new FoxStreamerView(mActivity, FoxSize.LANDER_TMBr);
+            mTMBrAdView = new FoxShView(mActivity);
+            mTMBrAdView.setTargetClass(mActivity, mActivity.getClass());
+            mTMBrAdView.setCountTtime(timeout / 1000);
+            mTMBrAdView.setAdListener(new FoxShListener() {
+                @Override
+                public void onTimeOut() {
+                    Log.d(Consts.TAG, "Tuia splash ad onTimeOut");
+                    mTMBrAdView.setTargetClass(null, mActivity.getClass());
 
-            mTMBrAdView.setAdListener(new FoxListener() {
+                    mActivity.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            methodChannel.invokeMethod("adFinish", null);
+                        }
+                    });
+                }
+
                 @Override
                 public void onReceiveAd() {
-                    Log.d(Consts.TAG, "Tuia banner ad onReceiveAd");
+                    Log.d(Consts.TAG, "Tuia splash ad onReceiveAd");
 
                     mActivity.runOnUiThread(new Runnable() {
                         @Override
@@ -128,7 +147,8 @@ public class FlutterBannerAdView implements PlatformView, MethodChannel.MethodCa
                 }
                 @Override
                 public void onFailedToReceiveAd() {
-                    Log.d(Consts.TAG, "Tuia banner ad onFailedToReceiveAd");
+                    Log.d(Consts.TAG, "Tuia splash ad onFailedToReceiveAd");
+                    mTMBrAdView.setTargetClass(null, mActivity.getClass());
 
                     mActivity.runOnUiThread(new Runnable() {
                         @Override
@@ -139,7 +159,8 @@ public class FlutterBannerAdView implements PlatformView, MethodChannel.MethodCa
                 }
                 @Override
                 public void onLoadFailed() {
-                    Log.d(Consts.TAG, "Tuia banner ad onLoadFailed");
+                    Log.d(Consts.TAG, "Tuia splash ad onLoadFailed");
+                    mTMBrAdView.setTargetClass(null, mActivity.getClass());
 
                     mActivity.runOnUiThread(new Runnable() {
                         @Override
@@ -150,11 +171,19 @@ public class FlutterBannerAdView implements PlatformView, MethodChannel.MethodCa
                 }
                 @Override
                 public void onCloseClick() {
-                    Log.d(Consts.TAG, "Tuia banner ad onCloseClick");
+                    Log.d(Consts.TAG, "Tuia splash ad onCloseClick");
+                    mTMBrAdView.setTargetClass(null, mActivity.getClass());
+
+                    mActivity.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            methodChannel.invokeMethod("adFinish", null);
+                        }
+                    });
                 }
                 @Override
                 public void onAdClick() {
-                    Log.d(Consts.TAG, "Tuia banner ad onClick");
+                    Log.d(Consts.TAG, "Tuia splash ad onClick");
 
                     mActivity.runOnUiThread(new Runnable() {
                         @Override
@@ -165,7 +194,7 @@ public class FlutterBannerAdView implements PlatformView, MethodChannel.MethodCa
                 }
                 @Override
                 public void onAdExposure() {
-                    Log.d(Consts.TAG, "Tuia banner ad onAdExposure");
+                    Log.d(Consts.TAG, "Tuia splash ad onAdExposure");
                     mActivity.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -186,7 +215,7 @@ public class FlutterBannerAdView implements PlatformView, MethodChannel.MethodCa
                 e.printStackTrace();
             }
         } catch (Exception e) {
-            Log.d(Consts.TAG, "Tuia banner ad failed");
+            Log.d(Consts.TAG, "Tuia splash ad failed");
             e.printStackTrace();
             try {
                 result.success(false);

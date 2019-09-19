@@ -8,6 +8,7 @@ import android.os.Build;
 import android.util.Log;
 
 import com.example.flutter_tuia.views.FlutterBannerAdViewFactory;
+import com.example.flutter_tuia.views.FlutterSplashAdViewFactory;
 import com.lechuan.midunovel.view.FoxSDK;
 
 import java.util.ArrayList;
@@ -36,6 +37,10 @@ public class FlutterTuiaPlugin implements MethodCallHandler {
     registrar.platformViewRegistry().registerViewFactory("flutter_tuia_banner_ad_view",
         new FlutterBannerAdViewFactory(new StandardMessageCodec(), registrar.activity(),
           registrar.messenger()));
+
+    registrar.platformViewRegistry().registerViewFactory("flutter_tuia_splash_ad_view",
+            new FlutterSplashAdViewFactory(new StandardMessageCodec(), registrar.activity(),
+                    registrar.messenger()));
   }
 
   @Override

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/services.dart';
 
 export 'flutter_tuia_banner_view.dart';
+export 'flutter_tuia_splash_view.dart';
 
 class FlutterTuia {
   static const MethodChannel _channel = const MethodChannel('flutter_tuia');
