@@ -74,14 +74,15 @@ public class FlutterSplashAdView implements PlatformView, MethodChannel.MethodCa
 
     @Override
     public void dispose() {
-        if (mLinearLayout != null) {
-            mLinearLayout.removeAllViews();
-            mLinearLayout = null;
-        }
+        methodChannel.setMethodCallHandler(null);
 
         if (mTMBrAdView != null) {
             mTMBrAdView.destroy();
             mTMBrAdView = null;
+        }
+
+        if (mLinearLayout != null) {
+            mLinearLayout.removeAllViews();
         }
     }
 
