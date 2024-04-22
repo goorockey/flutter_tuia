@@ -5,11 +5,11 @@ import 'package:flutter/services.dart';
 class FlutterTuiaSplashView extends StatefulWidget {
   final String positionId;
   final int timeout;
-  final Function onLoaded;
-  final Function onError;
-  final Function onClick;
-  final Function onExposure;
-  final Function onFinish;
+  final Function? onLoaded;
+  final Function? onError;
+  final Function? onClick;
+  final Function? onExposure;
+  final Function? onFinish;
 
   FlutterTuiaSplashView(
     this.positionId, {
